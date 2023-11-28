@@ -55,7 +55,7 @@ async def on_message(message):
 	# 	await message.channel.send(command_personal[1])
 	
 	if input_message[0] == '!help':
-		await message.channel.send("**Commands : \n\t!big\n\t!s <summoner_name>\n\t!jupuceau\n\t!dodo\n\t!roisouffrant**")
+		await message.channel.send("**Commands : \n\t!big\n\t!s <summoner_name>\n\t!m <summoner_name>**")
 	
 
 test = False
