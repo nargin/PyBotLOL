@@ -1,36 +1,7 @@
 import discord
-import json
 from riotwatcher import LolWatcher, ApiError
 
-def profile_ranked(data, lol_watcher): # command !pr
-	try:
-		user = lol_watcher.summoner.by_name(data.regions, data.nickname)
-	except ApiError as err:
-		return discord.Embed(title='User not found', description=f'User {data.nickname} not found', color=0xff0000, type='rich')
-
-	user_id = user['id']
-
-	try:
-		ranked_stats = lol_watcher.league.by_summoner(data.regions, user_id)
-	except ApiError as err:
-		return discord.Embed(title='User not found', description=f'User {data.nickname} not found', color=0xff0000, type='rich')
-
-	soloq_stats = None
-	for queue in ranked_stats:
-		if queue['queueType'] == 'RANKED_SOLO_5x5':
-			soloq_stats = queue
-			break
-
-	if soloq_stats == None:
-		return discord.Embed(title='User not found', description=f'User {data.nickname} not found', color=0xff0000, type='rich')
-
-	tier = soloq_stats['tier']
-	rank = soloq_stats['rank']
-	lp = soloq_stats['leaguePoints']
-	wins = soloq_stats['wins']
-	losses = soloq_stats['losses']
-	winrate = wins / (wins + losses) * 100
-
+def color_ranked(tier):
 	match tier:
 		case 'IRON':
 			color = 0x434343
@@ -54,20 +25,9 @@ def profile_ranked(data, lol_watcher): # command !pr
 			color = 0xFFA500
 		case _:
 			color = 0x000000
+	return color
 
-	message = f'{tier} {rank} {lp} LP\n'
-	if data.option == '1':
-		message += f'Wins : {wins} - Losses : {losses} - Winrate : {winrate:.2f}% '
-		message += ':warning:' if winrate < 50 else ':white_check_mark:'
-	
-	embed = discord.Embed(title=f'{data.nickname}\'s soloq rank', description=f'**{message}**', color=color, type='rich')
-	embed.set_thumbnail(url=f'https://raw.communitydragon.org/latest/game/assets/ux/tftmobile/particles/tft_regalia_{tier.lower()}.png')
-	return embed
-
-
-
-
-def	winrate_soloq(data, lol_watcher):
+def profile_ranked(data, lol_watcher): # command !pr
 	try:
 		user = lol_watcher.summoner.by_name(data.regions, data.nickname)
 	except ApiError as err:
@@ -86,18 +46,101 @@ def	winrate_soloq(data, lol_watcher):
 			soloq_stats = queue
 			break
 
-	if soloq_stats == None:
+	flex_stats = None
+	for queue in ranked_stats:
+		if queue['queueType'] == 'RANKED_FLEX_SR':
+			flex_stats = queue
+			break
+
+	if soloq_stats != None:
+		tier = soloq_stats['tier']
+		rank = soloq_stats['rank']
+		lp = soloq_stats['leaguePoints']
+		wins = soloq_stats['wins']
+		losses = soloq_stats['losses']
+		winrate = wins / (wins + losses) * 100
+
+	if flex_stats != None:
+		tier_flex = flex_stats['tier']
+		rank_flex = flex_stats['rank']
+		lp_flex = flex_stats['leaguePoints']
+		wins_flex = flex_stats['wins']
+		losses_flex = flex_stats['losses']
+		winrate_flex = wins_flex / (wins_flex + losses_flex) * 100
+
+
+	color = 0x000000
+	if soloq_stats != None:
+		color = color_ranked(tier)
+
+	elif flex_stats != None:
+		color = color_ranked(tier_flex)
+
+
+
+	if soloq_stats != None:
+		message = f'{tier} {rank} {lp} LP\n'
+		message += f'Wins : {wins} - Losses : {losses} - Winrate : {winrate:.2f}% '
+	
+	elif flex_stats != None:
+		message = f'{tier_flex} {rank_flex} {lp_flex} LP\n'
+		message += f'Wins : {wins_flex} - Losses : {losses_flex} - Winrate : {winrate_flex:.2f}% '
+	
+	else:
+		message = 'No ranked stats found'
+
+
+	if soloq_stats != None:	
+		embed = discord.Embed(title=f'{data.nickname}\'s soloq rank', description='', color=color, type='rich')
+		embed.add_field(name='Soloq :', value=f'{message}', inline=False)
+		embed.set_thumbnail(url=f'https://raw.communitydragon.org/latest/game/assets/ux/tftmobile/particles/tft_regalia_{tier.lower()}.png')
+	
+	if flex_stats != None:
+		embed.add_field(name='Flex :', value=f'{tier_flex} {rank_flex} {lp_flex} LP', inline=False)
+		embed.add_field(name='', value=f'Wins : {wins_flex} - Losses : {losses_flex} - Winrate : {winrate_flex:.2f}% ', inline=False)
+		if soloq_stats == None:
+			embed.set_thumbnail(url=f'https://raw.communitydragon.org/latest/game/assets/ux/tftmobile/particles/tft_regalia_{tier_flex.lower()}.png')
+	return embed
+
+
+
+
+def	winrate_ranked(data, lol_watcher):
+	try:
+		user = lol_watcher.summoner.by_name(data.regions, data.nickname)
+	except ApiError as err:
+		return discord.Embed(title='User not found', description=f'User {data.nickname} not found', color=0xff0000, type='rich')
+
+	user_id = user['id']
+
+	try:
+		ranked_stats = lol_watcher.league.by_summoner(data.regions, user_id)
+	except ApiError as err:
 		return discord.Embed(title='No ranked stats found', description=f'User {data.nickname} has no ranked stats', color=0xff0000, type='rich')
 
-	wins = soloq_stats['wins']
-	losses = soloq_stats['losses']
+	queue_type = 'RANKED_SOLO_5x5'
+	if data.option == 'f':
+		queue_type = 'RANKED_FLEX_SR'
+
+	queue_ranked_stats = None
+	for queue in ranked_stats:
+		if queue['queueType'] == queue_type:
+			queue_ranked_stats = queue
+			break
+
+	if queue_ranked_stats == None:
+		return discord.Embed(title='No ranked stats found', description=f'User {data.nickname} has no ranked stats', color=0xff0000, type='rich')
+
+	wins = queue_ranked_stats['wins']
+	losses = queue_ranked_stats['losses']
 	winrate = wins / (wins + losses) * 100
 
 	message = f'Wins : {wins} - Losses : {losses} - Winrate : {winrate:.2f}% '
 	message += ':warning:' if winrate < 50 else ':white_check_mark:'
 
 	color = 0xff0000 if winrate < 50 else 0x00ff00
-	embed = discord.Embed(title=f'{data.nickname}\'s soloq winrate', description=message, color=color, type='rich')
+	queue_type_message = 'Soloq' if queue_type == 'RANKED_SOLO_5x5' else 'Flex'
+	embed = discord.Embed(title=f'{data.nickname}\'s {queue_type_message} winrate', description=message, color=color, type='rich')
 	
 	return embed
 
@@ -106,7 +149,7 @@ def	winrate_soloq(data, lol_watcher):
 
 def mastery_champion(data, lol_watcher):
 	
-	data.option = 3 if data.option == 0 else 10 if data.option > 10 else data.option # 3 at min and 25 at max
+	data.option = 3 if data.option == 0 else 20 if data.option > 20 else data.option # 3 at min and 25 at max
 
 	try:
 		user = lol_watcher.summoner.by_name(data.regions, data.nickname)
@@ -194,6 +237,7 @@ def profile_user(data, lol_watcher):
 	level = user['summonerLevel']
 	icon = user['profileIconId']
 	icon_url = f'http://ddragon.leagueoflegends.com/cdn/{version}/img/profileicon/{icon}.png'
+	
 
 	print(f'{nick} {level} {icon_url}')
 

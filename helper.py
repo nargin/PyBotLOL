@@ -8,7 +8,7 @@ def helper():
 	help_message = {
 		'Profile': '!pr <summoner_name>\n',
 		'Mastery': '!m [n] <summoner_name>\nNumber of champions to display (default: 3)\n',
-		'Winrate': '!wr <summoner_name>\n',
+		'Winrate': '!wr [s/f] <summoner_name>\nSoloq or flex (default: soloq)\n',
 		'Help': '!help\n',
 		'Misc': '!big\n'
 	}
@@ -46,13 +46,21 @@ class Command:
 		self.parser(split)
 
 	def parser(self, split):
+		
 		self.command = command_list(split[0])
 		split.pop(0) # Remove command
+
 		if self.command == None or len(split) == 0:
 			return None
-		if split[0].isdigit():
+		
+		if split[0].isdigit() and self.command == 'mastery':
 			self.option = int(split[0])
 			split.pop(0) # Remove option
+
+		elif (split[0] == 's' or split[0] == 'f') and self.command == 'winrate':
+			self.option = split[0]
+			split.pop(0)
+
 		for value in split:
 			self.nickname += value + ' '
 		self.nickname = self.nickname[:-1]

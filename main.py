@@ -2,7 +2,7 @@ import os, sys
 import discord
 from riotwatcher import LolWatcher, ApiError
 from dotenv import load_dotenv
-from league_related import mastery_champion, profile_ranked, winrate_soloq
+from league_related import mastery_champion, profile_ranked, winrate_ranked
 from personal import personal
 from helper import helper, Command, command_list, morpion
 
@@ -63,7 +63,7 @@ async def on_message(message):
 			return
 		
 		case 'winrate':
-			await message.channel.send(embed=winrate_soloq(data_command, lol_watcher))
+			await message.channel.send(embed=winrate_ranked(data_command, lol_watcher))
 			return
 
 		case 'help':
