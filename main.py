@@ -44,7 +44,24 @@ async def on_message(message):
 	split = input_message.split(' ')
 	data_command = Command(split, region, lol_watcher)
 
-	# print(f'command : {data_command.command}, option : {data_command.option}, summoner_name : {data_command.nickname}')
+	print(f'command : {data_command.command}, option : {data_command.option}, summoner_name : {data_command.nickname}')
+
+	# To test
+
+	# function = {
+	# 	'big': lambda: message.channel.send("https://tenor.com/view/big-snoopa-gif-18474914"),
+	# 	'profile': profile_ranked(data_command, lol_watcher),
+	# 	'mastery': mastery_champion(data_command, lol_watcher),
+	# 	'winrate': winrate_ranked(data_command, lol_watcher),
+	# 	'help': helper(),
+	# 	'morpion': morpion(),
+	# }
+
+	# embed = function.get(data_command.command, None)
+
+	# if embed != None:
+	# 	await message.channel.send(embed=embed)
+
 
 	match data_command.command:
 		case None :
@@ -90,7 +107,6 @@ async def on_message(message):
 # TO DO :
 # Gain lp command
 # death of 20 last games
-# rank and lp soloq command
 
 test = 1 if len(sys.argv) > 1 and sys.argv[1] == 'test' else 0
 client.run(DISCORD_TOKEN)
