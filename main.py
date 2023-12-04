@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import discord
 import requests
 import json
+import time
 from riotwatcher import LolWatcher, ApiError
 
 # parsing.py
@@ -16,6 +17,7 @@ from command.alias import command_alias
 from command.mastery import mastery_champion
 from command.profile import profile_ranked
 from command.winrate import winrate_ranked
+from command.death import death_counter
 
 # Other
 from personal import personal
@@ -90,7 +92,10 @@ async def on_message(message):
 			return
 
 		case 'death':
+			start_time = time.time()
 			await message.channel.send(embed=death_counter(data_command, lol_watcher))
+			end_time = time.time()
+			print(f'Execution time : {end_time - start_time}')
 			return
 
 		case 'mastery': # Mastery
@@ -99,10 +104,6 @@ async def on_message(message):
 		
 		case 'winrate':
 			await message.channel.send(embed=winrate_ranked(data_command, lol_watcher))
-			return
-
-		case 'alias':
-			await message.channel.send(command_alias(data_command))
 			return
 
 		case 'help':

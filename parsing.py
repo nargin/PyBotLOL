@@ -25,13 +25,11 @@ def	command_list(command):
 	command_list = {
 		'!big': 'big',
 		'!pr': 'profile',
-		# '!pid': 'puuid',
 		'!death': 'death',
 		'!m': 'mastery',
 		'!wr': 'winrate',
 		'!help': 'help',
 		'!track': 'track',
-		'!alias': 'alias',
 		'!morpion': 'morpion'
 	}
 	return command_list.get(command, None)
@@ -42,7 +40,6 @@ class Command:
 	command = ''
 	option = 0
 	summoner_name = ''
-	alias_name = ''
 	actual_name = ''
 	regions = ''
 	puuid = ''
@@ -54,34 +51,6 @@ class Command:
 		self.lol_watcher = lol_watcher
 		self.lol_token = lol_token
 		self.parser(split, lol_token)
-
-
-	def alias_parser(self, split):
-		if len(split) == 0:
-			self.option = 'l'
-			return
-
-		if split[0] == 'a' or split[0] == 'add':
-			self.option = 'a'
-			split.pop(0) # Remove option
-		
-		elif split[0] == 'd' or split[0] == 'del':
-			self.option = 'd'
-			split.pop(0)
-		
-		elif split[0] == 'e' or split[0] == 'edit':
-			self.option = 'e'
-			split.pop(0)
-		
-		if len(split) < 2 and self.option != 'd': # Test if there is at least 2 arguments (alias and summoner_name)
-			return
-
-		self.alias_name = split[0]
-		split.pop(0) # Remove alias
-
-		for value in split:
-			self.summoner_name += value + ' '
-		self.summoner_name = self.summoner_name[:-1]
 
 
 
@@ -100,7 +69,7 @@ class Command:
 		riot_id = riot_id[:-1]
 
 		return self.GetSummonerName(riot_id, self.lol_token)
-		
+
 
 
 	def	GetSummonerName(self, riot_id, lol_token):
@@ -146,9 +115,6 @@ class Command:
 
 		if self.command == None:
 			return None
-
-		if self.command == 'alias':
-			return self.alias_parser(split)
 
 		elif len(split) != 0:
 			self.summoner_name = self.default_parser(split)

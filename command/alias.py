@@ -1,3 +1,7 @@
+# Not used anymore
+
+
+
 def add_alias(alias_list, new_alias, name_ref):
 	alias_list[new_alias] = name_ref
 	return 'Alias added'
@@ -46,3 +50,31 @@ def command_alias(data):
 
 		case _:
 			return 'Error'
+
+
+def alias_parser(self, split):
+	if len(split) == 0:
+		self.option = 'l'
+		return
+
+	if split[0] == 'a' or split[0] == 'add':
+		self.option = 'a'
+		split.pop(0) # Remove option
+	
+	elif split[0] == 'd' or split[0] == 'del':
+		self.option = 'd'
+		split.pop(0)
+	
+	elif split[0] == 'e' or split[0] == 'edit':
+		self.option = 'e'
+		split.pop(0)
+	
+	if len(split) < 2 and self.option != 'd': # Test if there is at least 2 arguments (alias and summoner_name)
+		return
+
+	self.alias_name = split[0]
+	split.pop(0) # Remove alias
+
+	for value in split:
+		self.summoner_name += value + ' '
+	self.summoner_name = self.summoner_name[:-1]
