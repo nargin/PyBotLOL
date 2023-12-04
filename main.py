@@ -1,10 +1,24 @@
+# Env import
 import os, sys
-import discord
-from riotwatcher import LolWatcher, ApiError
 from dotenv import load_dotenv
-from league_related import mastery_champion, profile_ranked, winrate_ranked
+
+# Web import
+import discord
+import requests
+import json
+from riotwatcher import LolWatcher, ApiError
+
+# parsing.py
+from parsing import *
+
+# Command Folder #
+from command.alias import command_alias
+from command.mastery import mastery_champion
+from command.profile import profile_ranked
+from command.winrate import winrate_ranked
+
+# Other
 from personal import personal
-from helper import helper, Command, command_list, morpion
 
 test = False
 
@@ -42,9 +56,9 @@ async def on_message(message):
 		return
 
 	split = input_message.split(' ')
-	data_command = Command(split, region, lol_watcher)
+	data_command = Command(split, region, lol_watcher, RIOT_API_KEY)
 
-	print(f'command : {data_command.command}, option : {data_command.option}, summoner_name : {data_command.nickname}')
+	print(f'command : {data_command.command}, option : {data_command.option}, summoner_name : {data_command.summoner_name}')
 
 	# To test
 
@@ -75,12 +89,20 @@ async def on_message(message):
 			await message.channel.send(embed=profile_ranked(data_command, lol_watcher))
 			return
 
+		case 'death':
+			await message.channel.send(embed=death_counter(data_command, lol_watcher))
+			return
+
 		case 'mastery': # Mastery
 			await message.channel.send(embed=mastery_champion(data_command, lol_watcher))
 			return
 		
 		case 'winrate':
 			await message.channel.send(embed=winrate_ranked(data_command, lol_watcher))
+			return
+
+		case 'alias':
+			await message.channel.send(command_alias(data_command))
 			return
 
 		case 'help':
